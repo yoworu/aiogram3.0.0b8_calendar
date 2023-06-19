@@ -1,5 +1,4 @@
 aiogram~=3.0.0b7
-aiogram_calendar3.0.0b8
 flake8
 pytest
 pytest-cov
