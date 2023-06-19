@@ -12,7 +12,7 @@ Project was forked for aiogram version 3.0.0b8 (3.0.0b7)
 ## Usage
 Install package
 
-        pip install aiogram_calendar3b8
+        pip install aiogram3b8_calendar
 
 A full working example on how to use aiogram-calendar is provided in *bot_example.py*. 
 You create a calendar and add it to a message with a *reply_markup* parameter and then you can process it in a callbackqueyhandler method using the *process_selection* method.
