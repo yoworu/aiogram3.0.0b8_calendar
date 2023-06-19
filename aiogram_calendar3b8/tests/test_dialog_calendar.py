@@ -1,11 +1,15 @@
+import os, sys
+import asyncio
 from datetime import datetime
 from unittest.mock import AsyncMock
 
 import pytest
+sys.path.append(os.path.dirname(__file__))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from aiogram_calendar import DialogCalendar
+from aiogram_calendar3b8 import DialogCalendar
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
+from aiogram_calendar3b8 import DialogCalCallback
 
 def test_init():
     dialog = DialogCalendar()
@@ -19,20 +23,19 @@ def test_init():
 async def test_start_calendar():
     result = await DialogCalendar().start_calendar()
 
-    assert type(result) == InlineKeyboardMarkup
-    assert result.row_width == 5
+    assert isinstance(result, InlineKeyboardMarkup)
+     
+    kb = result.inline_keyboard
+    assert isinstance(kb, list)
 
-    assert 'inline_keyboard' in result
-    kb = result['inline_keyboard']
-    assert type(kb) == list
+    for i in kb:
+        assert isinstance(i, list)
 
-    for i in range(0, len(kb)):
-        assert type(kb[i]) == list
-
-    assert type(kb[0][0]) == InlineKeyboardButton
+    assert isinstance(kb[0][0], InlineKeyboardButton)
     year = datetime.now().year
-    assert kb[0][0]['text'] == year - 2
-    assert type(kb[0][0]['callback_data']) == str
+
+    assert int(kb[0][0].text) == (year - 2)
+    assert isinstance(kb[0][0].callback_data, str)
 
 
 # checking if we can pass different years start period to check the range of buttons
@@ -49,12 +52,12 @@ async def test_start_calendar_params(year, expected1, expected2):
         result = await DialogCalendar().start_calendar(year=year)
     else:
         result = await DialogCalendar().start_calendar()
-    kb = result['inline_keyboard']
-    assert kb[0][0]['text'] == expected1
-    assert kb[0][4]['text'] == expected2
+    kb = result.inline_keyboard
+    assert int(kb[0][0].text) == expected1
+    assert int(kb[0][4].text) == expected2
 
 
-testset = [
+testset_deprecated = [
     ({'@': 'dialog_calendar', 'act': 'IGNORE', 'year': '2022', 'month': '8', 'day': '0'}, (False, None)),
     (
         {'@': 'dialog_calendar', 'act': 'SET-DAY', 'year': '2022', 'month': '8', 'day': '1'},
@@ -76,9 +79,19 @@ testset = [
 ]
 
 
+testset = [
+    (DialogCalCallback(act=test[0]['act'],
+                       year=test[0]['year'],
+                       month=test[0]['month'],
+                       day=test[0]['day']),
+     test[1]) for test in testset_deprecated
+]
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("callback_data, expected", testset)
 async def test_process_selection(callback_data, expected):
     query = AsyncMock()
     result = await DialogCalendar().process_selection(query=query, data=callback_data)
     assert result == expected
+    

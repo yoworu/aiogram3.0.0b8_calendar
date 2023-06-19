@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from aiogram_calendar import SimpleCalendar
+from aiogram_calendar3b8 import SimpleCalendar, SimpleCalCallback
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
@@ -17,19 +17,20 @@ def test_init():
 async def test_start_calendar():
     result = await SimpleCalendar().start_calendar()
 
-    assert type(result) == InlineKeyboardMarkup
-    assert result.row_width == 7
-    assert 'inline_keyboard' in result
-    kb = result['inline_keyboard']
-    assert type(kb) == list
+    assert isinstance(result, InlineKeyboardMarkup)
+    
+    assert result.inline_keyboard
+    
+    kb = result.inline_keyboard
+    assert isinstance(kb, list)
 
-    for i in range(0, len(kb)):
-        assert type(kb[i]) == list
+    for i in kb:
+        assert isinstance(i, list)
 
-    assert type(kb[0][1]) == InlineKeyboardButton
+    assert isinstance(kb[0][1], InlineKeyboardButton)
     now = datetime.now()
-    assert kb[0][1]['text'] == f'{calendar.month_name[now.month]} {str(now.year)}'
-    assert type(kb[0][1]['callback_data']) == str
+    assert kb[0][1].text == f'{calendar.month_name[now.month]} {str(now.year)}'
+    assert isinstance(kb[0][1].callback_data, str)
 
 
 # checking if we can pass different years & months as start periods
@@ -49,11 +50,11 @@ async def test_start_calendar_params(year, month, expected):
         result = await SimpleCalendar().start_calendar(year=year)
     elif month:
         result = await SimpleCalendar().start_calendar(month=month)
-    kb = result['inline_keyboard']
-    assert kb[0][1]['text'] == expected
+    kb = result.inline_keyboard
+    assert kb[0][1].text == expected
 
 
-testset = [
+testset_deprecated = [
     ({'@': 'simple_calendar', 'act': 'IGNORE', 'year': '2022', 'month': '8', 'day': '0'}, (False, None)),
     ({'@': 'simple_calendar', 'act': 'DAY', 'year': '2022', 'month': '8', 'day': '1'}, (True, datetime(2022, 8, 1))),
     ({'@': 'simple_calendar', 'act': 'DAY', 'year': '2021', 'month': '7', 'day': '16'}, (True, datetime(2021, 7, 16))),
@@ -62,6 +63,14 @@ testset = [
     ({'@': 'simple_calendar', 'act': 'PREV-MONTH', 'year': '2021', 'month': '8', 'day': '0'}, (False, None)),
     ({'@': 'simple_calendar', 'act': 'NEXT-YEAR', 'year': '2022', 'month': '8', 'day': '1'}, (False, None)),
     ({'@': 'simple_calendar', 'act': 'NEXT-MONTH', 'year': '2021', 'month': '8', 'day': '0'}, (False, None)),
+]
+
+testset = [
+    (SimpleCalCallback(act=test[0]['act'],
+                       year=test[0]['year'],
+                       month=test[0]['month'],
+                       day=test[0]['day']),
+     test[1]) for test in testset_deprecated
 ]
 
 
