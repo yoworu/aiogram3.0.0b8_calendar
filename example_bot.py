@@ -4,7 +4,7 @@ import asyncio
 from aiogram import Bot, Dispatcher, F, Router
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import Command
-from aiogram_calendar3b8 import SimpleCalCallback, SimpleCalendar, DialogCalCallback, DialogCalendar
+from aiogram3b8_calendar import SimpleCalCallback, SimpleCalendar, DialogCalCallback, DialogCalendar
 
 from config import API_TOKEN
 

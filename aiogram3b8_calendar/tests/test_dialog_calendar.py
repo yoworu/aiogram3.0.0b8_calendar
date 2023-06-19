@@ -1,15 +1,14 @@
-import os, sys
-import asyncio
 from datetime import datetime
+
 from unittest.mock import AsyncMock
 
 import pytest
-sys.path.append(os.path.dirname(__file__))
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from aiogram_calendar3b8 import DialogCalendar
+
+from aiogram3b8_calendar import DialogCalendar
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram_calendar3b8 import DialogCalCallback
+from aiogram3b8_calendar import DialogCalCallback
+
 
 def test_init():
     dialog = DialogCalendar()
