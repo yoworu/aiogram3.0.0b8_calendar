@@ -4,16 +4,16 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-  name='aiogram_calendar3b8',
-  packages=['aiogram_calendar3b8'],
+  name='aiogram3b8_calendar',
+  packages=['aiogram3b8_calendar'],
   version='0.0.1',
   license='MIT',
   description='Simple Inline Calendar & Date Selection tool for Aiogram Telegram bots',
   long_description=long_description,
   author='Andrew Nikolabay',
   author_email='',
-  url='https://github.com/noXplode/aiogram_calendar',
-  download_url='https://github.com/noXplode/aiogram_calendar/archive/refs/tags/0.1.1.tar.gz',
+  url='https://github.com/yoworu/aiogram3.0.0b8_calendar/',
+  download_url='https://github.com/yoworu/aiogram3.0.0b8_calendar.git',
   keywords=['Aiogram', 'Telegram', 'Bots', 'Calendar'],
   install_requires=[
           'aiogram==3.0.0b7',
