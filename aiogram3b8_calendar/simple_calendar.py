@@ -1,11 +1,11 @@
 import calendar
-from datetime import datetime, timedelta
+from datetime import timedelta, date
+
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
 
 # setting callback_data prefix and parts
 class CalendarCallback(CallbackData, prefix='simple_calendar'):
@@ -17,10 +17,10 @@ class CalendarCallback(CallbackData, prefix='simple_calendar'):
 
 class SimpleCalendar:
 
-    async def start_calendar(
-        self,
-        year: int = datetime.now().year,
-        month: int = datetime.now().month
+    @staticmethod
+    def start_calendar(
+        year: int = date.today().year,
+        month: int = date.today().month
     ) -> InlineKeyboardMarkup:
         """
         Creates an inline keyboard with the provided year and month
@@ -58,7 +58,7 @@ class SimpleCalendar:
         for week in month_calendar:
             calendar_rows = []
             for day in week:
-                if (day == 0):
+                if (day == 0): 
                     calendar_rows.append(InlineKeyboardButton(text=" ", callback_data=ignore_callback))
                     continue
                 calendar_rows.append(InlineKeyboardButton(
@@ -78,40 +78,40 @@ class SimpleCalendar:
         )
 
         return inline_kb.as_markup()
-
-    async def process_selection(self, query: CallbackQuery, data: CalendarCallback) -> tuple:
+    
+    @classmethod
+    async def process_selection(cls, query: CallbackQuery, data: CalendarCallback) -> date | None:
         """
         Process the callback_query. This method generates a new calendar if forward or
         backward is pressed. This method should be called inside a CallbackQueryHandler.
         :param query: callback_query, as provided by the CallbackQueryHandler
         :param data: callback_data, dictionary, set by calendar_callback
-        :return: Returns a tuple (Boolean,datetime), indicating if a date is selected
-                    and returning the date if so.
+        :return: Returns a date if a date is selected and returning the date if so.
         """
-        return_data = (False, None)
-        temp_date = datetime(int(data.year), int(data.month), 1)
+        return_data = None
+        temp_date = date(int(data.year), int(data.month), 1)
         # processing empty buttons, answering with no action
         if data.act == "IGNORE":
             await query.answer(cache_time=60)
         # user picked a day button, return date
         if data.act == "DAY":
             await query.message.delete_reply_markup()   # removing inline keyboard
-            return_data = True, datetime(int(data.year), int(data.month), int(data.day))
+            return_data = date(int(data.year), int(data.month), int(data.day))
         # user navigates to previous year, editing message with new calendar
         if data.act == "PREV-YEAR":
-            prev_date = datetime(int(data.year) - 1, int(data.month), 1)
-            await query.message.edit_reply_markup(reply_markup=await self.start_calendar(int(prev_date.year), int(prev_date.month)))
+            prev_date = date(int(data.year) - 1, int(data.month), 1)
+            await query.message.edit_reply_markup(reply_markup=cls.start_calendar(int(prev_date.year), int(prev_date.month)))
         # user navigates to next year, editing message with new calendar
         if data.act == "NEXT-YEAR":
-            next_date = datetime(int(data.year) + 1, int(data.month), 1)
-            await query.message.edit_reply_markup(reply_markup=await self.start_calendar(int(next_date.year), int(next_date.month)))
+            next_date = date(int(data.year) + 1, int(data.month), 1)
+            await query.message.edit_reply_markup(reply_markup=cls.start_calendar(int(next_date.year), int(next_date.month)))
         # user navigates to previous month, editing message with new calendar
         if data.act == "PREV-MONTH":
             prev_date = temp_date - timedelta(days=1)
-            await query.message.edit_reply_markup(reply_markup=await self.start_calendar(int(prev_date.year), int(prev_date.month)))
+            await query.message.edit_reply_markup(reply_markup=cls.start_calendar(int(prev_date.year), int(prev_date.month)))
         # user navigates to next month, editing message with new calendar
         if data.act == "NEXT-MONTH":
             next_date = temp_date + timedelta(days=31)
-            await query.message.edit_reply_markup(reply_markup=await self.start_calendar(int(next_date.year), int(next_date.month)))
+            await query.message.edit_reply_markup(reply_markup=cls.start_calendar(int(next_date.year), int(next_date.month)))
         # at some point user clicks DAY button, returning date
         return return_data

@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setup(
   name='aiogram3b8_calendar',
   packages=['aiogram3b8_calendar'],
-  version='0.0.1',
+  version='0.0.2',
   license='MIT',
   description='Simple Inline Calendar & Date Selection tool for Aiogram Telegram bots',
   long_description=long_description,

@@ -1,5 +1,6 @@
 import calendar
-from datetime import datetime
+from datetime import date
+
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters.callback_data import CallbackData
@@ -20,13 +21,10 @@ ignore_callback = CalendarCallback(act="IGNORE", year=-1, month=-1, day=-1).pack
 class DialogCalendar:
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-    def __init__(self, year: int = datetime.now().year, month: int = datetime.now().month):
-        self.year = year
-        self.month = month
 
-    async def start_calendar(
-        self,
-        year: int = datetime.now().year
+    @staticmethod
+    def start_calendar(
+        year: int = date.today().year
     ) -> InlineKeyboardMarkup:
         inline_kb = InlineKeyboardBuilder()
         
@@ -53,7 +51,8 @@ class DialogCalendar:
 
         return inline_kb.as_markup()
 
-    async def _get_month_kb(self, year: int):
+    @classmethod
+    def _get_month_kb(cls, year: int):
         inline_kb = InlineKeyboardBuilder()
         
         # first row with year button
@@ -67,22 +66,23 @@ class DialogCalendar:
         )
         # two rows with 6 months buttons
         months_1 = []
-        for month in self.months[0:6]:
+        for month in cls.months[0:6]:
             months_1.append(InlineKeyboardButton(
                 text=month,
-                callback_data=CalendarCallback(act="SET-MONTH", year=year, month=self.months.index(month)+1, day=-1).pack()
+                callback_data=CalendarCallback(act="SET-MONTH", year=year, month=cls.months.index(month)+1, day=-1).pack()
             ))
         inline_kb.row(*months_1, width=6)
         months_2 = []
-        for month in self.months[6:12]:
+        for month in cls.months[6:12]:
             months_2.append(InlineKeyboardButton(
                 text=month,
-                callback_data=CalendarCallback(act="SET-MONTH", year=year, month=self.months.index(month)+1, day=-1).pack()
+                callback_data=CalendarCallback(act="SET-MONTH", year=year, month=cls.months.index(month)+1, day=-1).pack()
             ))
         inline_kb.row(*months_2, width=6)
         return inline_kb.as_markup()
 
-    async def _get_days_kb(self, year: int, month: int):
+    @classmethod
+    def _get_days_kb(cls, year: int, month: int):
         inline_kb = InlineKeyboardBuilder()
         
         inline_kb.row(
@@ -91,7 +91,7 @@ class DialogCalendar:
                 callback_data=CalendarCallback(act="START", year=year, month=-1, day=-1).pack()
             ),
             InlineKeyboardButton(
-                text=self.months[month - 1],
+                text=cls.months[month - 1],
                 callback_data=CalendarCallback(act="SET-YEAR", year=year, month=-1, day=-1).pack()
             ),
         )
@@ -112,23 +112,32 @@ class DialogCalendar:
             inline_kb.row(*days, width=7)
         return inline_kb.as_markup()
 
-    async def process_selection(self, query: CallbackQuery, data: CalendarCallback) -> tuple:
-        return_data = (False, None)
+    @classmethod
+    async def process_selection(cls, query: CallbackQuery, data: CalendarCallback) -> date | None:
+        """
+        Process the callback_query. This method generates a new calendar if forward or
+        backward is pressed. This method should be called inside a CallbackQueryHandler.
+        :param query: callback_query, as provided by the CallbackQueryHandler
+        :param data: callback_data, dictionary, set by calendar_callback
+        :return: Returns a date, indicating if a date is selected
+        and returning the date if so.
+        """
+        return_data = None
         if data.act == "IGNORE":
             await query.answer(cache_time=60)
         if data.act == "SET-YEAR":
-            await query.message.edit_reply_markup(reply_markup=await self._get_month_kb(int(data.year)))
+            await query.message.edit_reply_markup(reply_markup=cls._get_month_kb(int(data.year)))
         if data.act == "PREV-YEARS":
             new_year = int(data.year) - 5
-            await query.message.edit_reply_markup(reply_markup=await self.start_calendar(new_year))
+            await query.message.edit_reply_markup(reply_markup=cls.start_calendar(new_year))
         if data.act == "NEXT-YEARS":
             new_year = int(data.year) + 5
-            await query.message.edit_reply_markup(reply_markup=await self.start_calendar(new_year))
+            await query.message.edit_reply_markup(reply_markup=cls.start_calendar(new_year))
         if data.act == "START":
-            await query.message.edit_reply_markup(reply_markup=await self.start_calendar(int(data.year)))
+            await query.message.edit_reply_markup(reply_markup=cls.start_calendar(int(data.year)))
         if data.act == "SET-MONTH":
-            await query.message.edit_reply_markup(reply_markup=await self._get_days_kb(int(data.year), int(data.month)))
+            await query.message.edit_reply_markup(reply_markup=cls._get_days_kb(int(data.year), int(data.month)))
         if data.act == "SET-DAY":
             await query.message.delete_reply_markup()   # removing inline keyboard
-            return_data = True, datetime(int(data.year), int(data.month), int(data.day))
+            return_data = date(int(data.year), int(data.month), int(data.day))
         return return_data

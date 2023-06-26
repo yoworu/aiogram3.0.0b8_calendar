@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 from unittest.mock import AsyncMock
 
@@ -7,20 +7,15 @@ import pytest
 
 from aiogram3b8_calendar import DialogCalendar
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 from aiogram3b8_calendar import DialogCalCallback
 
-
-def test_init():
-    dialog = DialogCalendar()
-    assert dialog
-    assert dialog.year == datetime.now().year
-    assert dialog.month == datetime.now().month
 
 
 # checking that overall structure of returned object is correct
 @pytest.mark.asyncio
 async def test_start_calendar():
-    result = await DialogCalendar().start_calendar()
+    result = DialogCalendar.start_calendar()
 
     assert isinstance(result, InlineKeyboardMarkup)
      
@@ -31,7 +26,7 @@ async def test_start_calendar():
         assert isinstance(i, list)
 
     assert isinstance(kb[0][0], InlineKeyboardButton)
-    year = datetime.now().year
+    year = date.today().year
 
     assert int(kb[0][0].text) == (year - 2)
     assert isinstance(kb[0][0].callback_data, str)
@@ -40,7 +35,7 @@ async def test_start_calendar():
 # checking if we can pass different years start period to check the range of buttons
 testset = [
     (2020, 2018, 2022),
-    (None, datetime.now().year - 2, datetime.now().year + 2),
+    (None, date.today().year - 2, date.today().year + 2),
 ]
 
 
@@ -48,33 +43,33 @@ testset = [
 @pytest.mark.parametrize("year, expected1, expected2", testset)
 async def test_start_calendar_params(year, expected1, expected2):
     if year:
-        result = await DialogCalendar().start_calendar(year=year)
+        result = DialogCalendar.start_calendar(year=year)
     else:
-        result = await DialogCalendar().start_calendar()
+        result = DialogCalendar.start_calendar()
     kb = result.inline_keyboard
     assert int(kb[0][0].text) == expected1
     assert int(kb[0][4].text) == expected2
 
 
 testset_deprecated = [
-    ({'@': 'dialog_calendar', 'act': 'IGNORE', 'year': '2022', 'month': '8', 'day': '0'}, (False, None)),
+    ({'@': 'dialog_calendar', 'act': 'IGNORE', 'year': '2022', 'month': '8', 'day': '0'}, (None)),
     (
         {'@': 'dialog_calendar', 'act': 'SET-DAY', 'year': '2022', 'month': '8', 'day': '1'},
-        (True, datetime(2022, 8, 1))
+        (date(2022, 8, 1))
     ),
     (
         {'@': 'dialog_calendar', 'act': 'SET-DAY', 'year': '2021', 'month': '7', 'day': '16'},
-        (True, datetime(2021, 7, 16))
+        (date(2021, 7, 16))
     ),
     (
         {'@': 'dialog_calendar', 'act': 'SET-DAY', 'year': '1900', 'month': '10', 'day': '8'},
-        (True, datetime(1900, 10, 8))
+        (date(1900, 10, 8))
     ),
-    ({'@': 'dialog_calendar', 'act': 'PREV-YEARS', 'year': '2022', 'month': '8', 'day': '1'}, (False, None)),
-    ({'@': 'dialog_calendar', 'act': 'NEXT-YEARS', 'year': '2021', 'month': '8', 'day': '0'}, (False, None)),
-    ({'@': 'dialog_calendar', 'act': 'SET-MONTH', 'year': '2022', 'month': '8', 'day': '1'}, (False, None)),
-    ({'@': 'dialog_calendar', 'act': 'SET-YEAR', 'year': '2021', 'month': '8', 'day': '0'}, (False, None)),
-    ({'@': 'dialog_calendar', 'act': 'START', 'year': '2021', 'month': '8', 'day': '0'}, (False, None)),
+    ({'@': 'dialog_calendar', 'act': 'PREV-YEARS', 'year': '2022', 'month': '8', 'day': '1'}, (None)),
+    ({'@': 'dialog_calendar', 'act': 'NEXT-YEARS', 'year': '2021', 'month': '8', 'day': '0'}, (None)),
+    ({'@': 'dialog_calendar', 'act': 'SET-MONTH', 'year': '2022', 'month': '8', 'day': '1'}, (None)),
+    ({'@': 'dialog_calendar', 'act': 'SET-YEAR', 'year': '2021', 'month': '8', 'day': '0'}, (None)),
+    ({'@': 'dialog_calendar', 'act': 'START', 'year': '2021', 'month': '8', 'day': '0'}, (None)),
 ]
 
 
@@ -91,6 +86,6 @@ testset = [
 @pytest.mark.parametrize("callback_data, expected", testset)
 async def test_process_selection(callback_data, expected):
     query = AsyncMock()
-    result = await DialogCalendar().process_selection(query=query, data=callback_data)
+    result = await DialogCalendar.process_selection(query=query, data=callback_data)
     assert result == expected
     
