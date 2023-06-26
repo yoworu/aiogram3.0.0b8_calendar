@@ -119,8 +119,7 @@ class DialogCalendar:
         backward is pressed. This method should be called inside a CallbackQueryHandler.
         :param query: callback_query, as provided by the CallbackQueryHandler
         :param data: callback_data, dictionary, set by calendar_callback
-        :return: Returns a date, indicating if a date is selected
-        and returning the date if so.
+        :return: Returns a date or None.
         """
         return_data = None
         if data.act == "IGNORE":

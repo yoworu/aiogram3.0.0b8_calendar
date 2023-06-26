@@ -86,7 +86,7 @@ class SimpleCalendar:
         backward is pressed. This method should be called inside a CallbackQueryHandler.
         :param query: callback_query, as provided by the CallbackQueryHandler
         :param data: callback_data, dictionary, set by calendar_callback
-        :return: Returns a date if a date is selected and returning the date if so.
+        :return: Returns a date or None.
         """
         return_data = None
         temp_date = date(int(data.year), int(data.month), 1)
