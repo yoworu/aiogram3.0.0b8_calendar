@@ -9,6 +9,10 @@ Dialog calendar - user selects year on first stage, month on next stage, day on 
 
 Project was forked for aiogram version 3.0.0b8 (3.0.0b7)
 
+
+## Original repository already have version for 3.x release: https://github.com/noXplode/aiogram_calendar 
+
+
 ## Usage
 Install package
 
